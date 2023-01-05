@@ -1,0 +1,17 @@
+name: Delete PR Docker Image
+
+# Controls when the workflow will run
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - 'dev'
+jobs:
+  delete-docker:
+    uses: umdlife/umd_workflows/.github/workflows/delete_docker.yaml@main
+    with:
+      repository: ${{ github.event.repository.name }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -81,11 +81,11 @@ the use of this software, even if advised of the possibility of such damage.
  */
 
 #ifndef _KCFTRACKER_HEADERS
-#include "kcftracker.hpp"
-#include "ffttools.hpp"
-#include "recttools.hpp"
-#include "fhog.hpp"
-#include "labdata.hpp"
+#include "KCFcpp/kcftracker.hpp"
+#include "KCFcpp/ffttools.hpp"
+#include "KCFcpp/recttools.hpp"
+#include "KCFcpp/fhog.hpp"
+#include "KCFcpp/labdata.hpp"
 #endif
 
 // Constructor
@@ -172,6 +172,12 @@ void KCFTracker::init(const cv::Rect &roi, cv::Mat image)
 // Update position based on the new frame
 cv::Rect KCFTracker::update(cv::Mat image)
 {
+    float aux;
+    return update(image, aux);
+}
+
+cv::Rect KCFTracker::update(cv::Mat image, float& peak_value)
+{
     if (_roi.x + _roi.width <= 0) _roi.x = -_roi.width + 1;
     if (_roi.y + _roi.height <= 0) _roi.y = -_roi.height + 1;
     if (_roi.x >= image.cols - 1) _roi.x = image.cols - 2;
@@ -180,8 +186,6 @@ cv::Rect KCFTracker::update(cv::Mat image)
     float cx = _roi.x + _roi.width / 2.0f;
     float cy = _roi.y + _roi.height / 2.0f;
 
-
-    float peak_value;
     cv::Point2f res = detect(_tmpl, getFeatures(image, 0, 1.0f), peak_value);
 
     if (scale_step != 1) {
@@ -224,7 +228,6 @@ cv::Rect KCFTracker::update(cv::Mat image)
 
     return _roi;
 }
-
 
 // Detect object in the current frame.
 cv::Point2f KCFTracker::detect(cv::Mat z, cv::Mat x, float &peak_value)
@@ -403,7 +406,7 @@ cv::Mat KCFTracker::getFeatures(const cv::Mat & image, bool inithann, float scal
 
     // HOG features
     if (_hogfeatures) {
-        IplImage z_ipl = z;
+        IplImage z_ipl = cvIplImage(z);
         CvLSVMFeatureMapCaskade *map;
         getFeatureMaps(&z_ipl, cell_size, &map);
         normalizeAndTruncate(map,0.2f);
